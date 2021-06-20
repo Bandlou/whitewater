@@ -4,6 +4,9 @@ A whitewater boat simulation game prototype focused primarily on slalom and free
 ## Dictionary
 - https://www.ville-huningue.fr/fr/dictionnaire-multilingue/
 
+## Boat physic
+- Friction du courant
+
 ## Inputs
 - WASD / JoystickLeft: advance / turn:
   - Turn leaning forward => sweep (circulaire)
