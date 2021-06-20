@@ -12,3 +12,8 @@ A whitewater boat simulation game prototype focused primarily on slalom and free
 Tips:
 - Use Unity ProBuilder to create the water tiles (10x10 with 199x199)
 - Use Unity PolyBrush to change the height of the tiles' vertices
+
+References:
+- https://www.youtube.com/watch?v=JQyntL-Z5bM
+- https://www.youtube.com/watch?v=XOjd_qU2Ido
+- https://docs.unity3d.com/2019.3/Documentation/Manual/BestPracticeMakingBelievableVisuals1.html
