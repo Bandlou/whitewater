@@ -1,6 +1,20 @@
 # Whitewater
 A whitewater boat simulation game prototype focused primarily on slalom and freestyle
 
+## Dictionary
+- https://www.ville-huningue.fr/fr/dictionnaire-multilingue/
+
+## Inputs
+- WASD / JoystickLeft: advance / turn:
+  - Turn leaning forward => sweep (circulaire)
+  - Turn leaning normally => draw (appel)
+  - Turn leaning backward => reverse sweep (rétro)
+- IJKL / Mouse / JoystickRight:
+  - Vertically: lean forward / backward
+  - Horizontally: lean to the left / right (the list)
+- Alt left / Mouse Left Click / R1: look to the left
+- Alt right / Mouse Right Click / L1: look to the right
+
 ## Boat 3D info
 - A boat should have around 200 faces to work well with the physic system
 - It should also respect the real world size for believable physics (around 300cm x 60cm x 20cm)
