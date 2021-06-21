@@ -5,7 +5,14 @@ A whitewater boat simulation game prototype focused primarily on slalom and free
 - https://www.ville-huningue.fr/fr/dictionnaire-multilingue/
 
 ## Boat physic
-- Friction du courant
+- Water friction: drag (resist to boat movement) + friction of courant on boat
+  - Proportional to water viscosity
+  - Proportional to speed
+  - Inv. proportional to streamlining (shape of the boat)
+- Water forces:
+  - Buoyancy force: B = pVg = 1000 * volume displaced body * g (direction = upward)
+  - Viscosity force: Fgamma = 6 * Pi * 1.002 * radius displaced body * velocity (direction = against velocity)
+  - Drag force: Fdrag = 0.5 * dragCoef * p * Ac * v^2 = 0.5 * DragCoeff * 1000 * CrossSectionalArea * velocity^2
 
 ## Inputs
 - WASD / JoystickLeft: advance / turn:
