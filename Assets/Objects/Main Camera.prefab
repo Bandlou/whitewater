@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6305682422978356193}
   - component: {fileID: 6305682422978356198}
   - component: {fileID: 6305682422978356197}
+  - component: {fileID: 7368680463517422640}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -44,7 +45,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0.4, b: 0.7, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -129,6 +130,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1a11ff4e86e5c846b4c2014078bc859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waterManager: {fileID: 0}
+  fogColor: {r: 0, g: 0.4, b: 0.7, a: 0.6}
+  fogDensity: 0.2
+--- !u!114 &7368680463517422640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6305682422978356194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80031ff6d25d6c34892c10819a30c07a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   target: {fileID: 0}
-  trackingOffset: {x: 3, y: 0.5, z: 1}
-  rotationOffset: {x: 10, y: 250, z: 0}
+  trackingOffset: {x: 1, y: 0.5, z: 1}
+  rotationOffset: {x: 10, y: -130, z: 0}

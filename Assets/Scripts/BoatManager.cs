@@ -87,6 +87,7 @@ public class BoatManager : MonoBehaviour
         {
             // Get boat grid coordinates
             waterManager.GetGridCoordinates(transform.position, out int x, out int z);
+            Debug.Log("x=" + x + ", z=" + z);
 
             // Get local water data
             float waterHeight = waterManager.WaterHeightGrid[x, z] + waterManager.transform.position.y;

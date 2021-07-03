@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
-public class CameraManager : MonoBehaviour
+public class CameraFollower : MonoBehaviour
 {
     // PUBLIC FIELDS
     public GameObject target;
@@ -12,7 +12,7 @@ public class CameraManager : MonoBehaviour
 
     // LIFECYCLE
 
-    private void Update()
+    void Update()
     {
         // Rounded position
         transform.position = target.transform.position + target.transform.rotation * trackingOffset;

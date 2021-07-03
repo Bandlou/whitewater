@@ -39,7 +39,7 @@ public class WaterManager : MonoBehaviour
                 for (int z = 0; z < GridSize[1]; ++z)
                 {
                     waterHeightGrid[x, z] = 0;// (x + z) * 0.1f; // Mathf.Pow(x - gridSize[0] * .5f, 2) * .001f;
-                    waterVelocityGrid[x, z] = Vector2.right * 5;
+                    waterVelocityGrid[x, z] = Vector2.right * 0;
                 }
             }
         }
