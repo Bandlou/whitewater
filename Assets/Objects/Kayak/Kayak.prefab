@@ -139,7 +139,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 10
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -157,12 +157,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6bc05d69f755734488455addee1f577, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  airLinearDrag: 0.01
+  airAngularDrag: 0.5
+  waterLinearDrag: 2
+  waterAngularDrag: 2
   waterManager: {fileID: 0}
   depthBeforeSubmerged: 0.25
   floatingHeight: -0.2
   displacementAmount: 1.5
-  waterDrag: 0.99
-  angularDrag: 0.8
   forwardStrength: 50
   backwardStrength: 25
   lateralStrength: 10

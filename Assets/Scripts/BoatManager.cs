@@ -23,22 +23,24 @@ public class BoatManager : MonoBehaviour
         public float Surface { get; }
     }
 
-    // PUBLIC FIELDS (water physic)
+    // PUBLIC FIELDS
+    [Header("Air physics")]
+    public float airLinearDrag = .005f;
+    public float airAngularDrag = .5f;
+    [Header("Water physics")]
+    public float waterLinearDrag = .05f;
+    public float waterAngularDrag = .5f;
     public WaterManager waterManager;
     public float depthBeforeSubmerged = 1;
     public float floatingHeight = 1;
     public float displacementAmount = 3;
-    public float waterDrag = .99f;
-    public float angularDrag = .5f;
-
-    // PUBLIC FIELDS (player physics)
+    [Header("Player physics")]
     public float forwardStrength = 50;
     public float backwardStrength = 25;
     public float lateralStrength = 5;
     public float rotativeStrength = 20;
     public float waterSurfaceDistToPaddle = 1;
-
-    // PUBLIC FIELDS (debug)
+    [Header("Debug")]
     public bool debugMode = false;
     public float debugPositionRadius = .25f;
     public float debugNormalLength = 1;
@@ -138,37 +140,92 @@ public class BoatManager : MonoBehaviour
                 // Get local grid coordinates
                 waterManager.GetGridCoordinates(faceWorldPosition, out int faceX, out int faceZ);
 
-                // Check if not out of grid
+                // Check if underwater
+                bool underwater = false;
                 if (waterManager.AreCoordinatesValid(faceX, faceZ))
                 {
                     // Get local water height
                     float waterHeight = waterManager.WaterGrid[faceX, faceZ].height + waterManager.transform.position.y;
+                    // Update underwater status
+                    underwater = faceWorldFloatingHeight < waterHeight;
+                }
 
-                    // If under water
-                    if (faceWorldFloatingHeight < waterHeight)
+                // Apply physics
+                Vector3 faceWorldNormal = transform.rotation * facesData[i].Normal;
+                if (underwater) // Water physics
+                {
+                    // Get local water height
+                    float waterHeight = waterManager.WaterGrid[faceX, faceZ].height + waterManager.transform.position.y;
+
+                    // Get local water data
+                    Vector3 waterNormal = waterManager.WaterGrid[faceX, faceZ].normal;
+                    Vector2 waterVelocity = waterManager.WaterGrid[faceX, faceZ].velocity;
+                    Vector3 waterForce = Vector3.ProjectOnPlane(new Vector3(waterVelocity.x, 0, waterVelocity.y), waterNormal);
+
+                    // Buoyancy
+                    float displacementMultiplier = Mathf.Clamp01((waterHeight - faceWorldFloatingHeight) / depthBeforeSubmerged) * displacementAmount;
+                    rigidbody.AddForceAtPosition(waterNormal * Physics.gravity.magnitude * faceSurfaceRatio * displacementMultiplier,
+                                                 faceWorldPosition,
+                                                 ForceMode.Acceleration);
+
+                    // Linear drag (DragCoeff * CrossSectionalArea * velocity^2)
+                    float linearDragDot = Vector3.Dot(faceWorldNormal, rigidbody.velocity.normalized);
+                    if (linearDragDot > 0)
                     {
-                        // Get local water data
-                        Vector3 waterNormal = waterManager.WaterGrid[faceX, faceZ].normal;
-                        Vector2 waterVelocity = waterManager.WaterGrid[faceX, faceZ].velocity;
-                        Vector3 waterForce = Vector3.ProjectOnPlane(new Vector3(waterVelocity.x, 0, waterVelocity.y), waterNormal);
+                        float sqrDot = Mathf.Pow(linearDragDot, 2);
+                        float crossSectionalArea = faceSurface * sqrDot;
+                        rigidbody.AddForce(waterLinearDrag * crossSectionalArea * rigidbody.velocity.sqrMagnitude * -rigidbody.velocity.normalized * Time.fixedDeltaTime,
+                                           ForceMode.VelocityChange);
+                    }
 
-                        // Push upward
-                        float displacementMultiplier = Mathf.Clamp01((waterHeight - faceWorldFloatingHeight) / depthBeforeSubmerged) * displacementAmount;
-                        rigidbody.AddForceAtPosition(waterNormal * Physics.gravity.magnitude * faceSurfaceRatio * displacementMultiplier,
-                                                     faceWorldPosition,
-                                                     ForceMode.Acceleration);
-                        rigidbody.AddForce(faceSurfaceRatio * displacementMultiplier * -rigidbody.velocity * waterDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
-                        rigidbody.AddTorque(faceSurfaceRatio * displacementMultiplier * -rigidbody.angularVelocity * angularDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
+                    // Angular drag (DragCoeff * CrossSectionalArea * velocity^2)
+                    float angle = Mathf.Rad2Deg * rigidbody.angularVelocity.magnitude;
+                    Vector3 axis = rigidbody.angularVelocity.normalized;
+                    Vector3 nextFaceWorldPosition = Quaternion.AngleAxis(angle, axis) * (faceWorldPosition - transform.position);
+                    Vector3 angularMovement = nextFaceWorldPosition - (faceWorldPosition - transform.position);
 
-                        // Push according to water velocity
-                        var faceWorldNormal = transform.rotation * facesData[i].Normal;
-                        var dot = Vector3.Dot(faceWorldNormal, waterForce);
-                        if (dot < 0)
-                        {
-                            var sqrDot = Mathf.Pow(dot, 2);
-                            var resultingForce = faceWorldNormal * -sqrDot;
-                            rigidbody.AddForceAtPosition(resultingForce * faceSurface * waterForce.magnitude, faceWorldPosition, ForceMode.Force);
-                        }
+                    float angularDragDot = Vector3.Dot(faceWorldNormal, angularMovement.normalized);
+                    if (angularDragDot > 0)
+                    {
+                        float sqrDot = Mathf.Pow(angularDragDot, 2);
+                        float crossSectionalArea = faceSurface * sqrDot;
+                        rigidbody.AddTorque(waterAngularDrag * crossSectionalArea * rigidbody.angularVelocity.sqrMagnitude * -rigidbody.angularVelocity.normalized * Time.fixedDeltaTime,
+                                            ForceMode.VelocityChange);
+                    }
+
+                    // Current (rushing water)
+                    float currentDot = Vector3.Dot(faceWorldNormal, waterForce.normalized);
+                    if (currentDot < 0)
+                    {
+                        float sqrDot = Mathf.Pow(currentDot, 2);
+                        Vector3 resultingForce = faceWorldNormal * -sqrDot;
+                        rigidbody.AddForceAtPosition(resultingForce * faceSurface * waterForce.magnitude, faceWorldPosition, ForceMode.Force);
+                    }
+                }
+                else // Air physics
+                {
+                    // Linear drag (DragCoeff * CrossSectionalArea * velocity^2)
+                    float linearDragDot = Vector3.Dot(faceWorldNormal, rigidbody.velocity.normalized);
+                    if (linearDragDot > 0)
+                    {
+                        float sqrDot = Mathf.Pow(linearDragDot, 2);
+                        float crossSectionalArea = faceSurface * sqrDot;
+                        rigidbody.AddForce(airLinearDrag * crossSectionalArea * rigidbody.velocity.sqrMagnitude * -rigidbody.velocity.normalized * Time.fixedDeltaTime, ForceMode.VelocityChange);
+                    }
+
+                    // Angular drag (DragCoeff * CrossSectionalArea * velocity^2)
+                    float angle = Mathf.Rad2Deg * rigidbody.angularVelocity.magnitude;
+                    Vector3 axis = rigidbody.angularVelocity.normalized;
+                    Vector3 nextFaceWorldPosition = Quaternion.AngleAxis(angle, axis) * (faceWorldPosition - transform.position);
+                    Vector3 angularMovement = nextFaceWorldPosition - (faceWorldPosition - transform.position);
+
+                    float angularDragDot = Vector3.Dot(faceWorldNormal, angularMovement.normalized);
+                    if (angularDragDot > 0)
+                    {
+                        float sqrDot = Mathf.Pow(angularDragDot, 2);
+                        float crossSectionalArea = faceSurface * sqrDot;
+                        rigidbody.AddTorque(airAngularDrag * crossSectionalArea * rigidbody.angularVelocity.sqrMagnitude * -rigidbody.angularVelocity.normalized * Time.fixedDeltaTime,
+                                            ForceMode.VelocityChange);
                     }
                 }
             }
