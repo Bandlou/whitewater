@@ -131,8 +131,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waterManager: {fileID: 0}
-  fogColor: {r: 0, g: 0.4, b: 0.7, a: 0.6}
-  fogDensity: 0.2
+  underwaterFogColor: {r: 0, g: 0.4, b: 0.7, a: 0.6}
+  underwaterFogDensity: 0.2
 --- !u!114 &7368680463517422640
 MonoBehaviour:
   m_ObjectHideFlags: 0

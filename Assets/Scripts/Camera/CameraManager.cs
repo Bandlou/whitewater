@@ -6,15 +6,15 @@ public class CameraManager : MonoBehaviour
 {
     // PUBLIC FIELDS
     public WaterManager waterManager;
-    public Color fogColor = new Color(0, 0.4f, 0.7f, 0.6f);
-    public float fogDensity = .04f;
+    public Color underwaterFogColor = new Color(0, 0.4f, 0.7f, 0.6f);
+    public float underwaterFogDensity = .2f;
 
     // PRIVATE FIELDS
     private bool defaultFog;
     private Color defaultFogColor;
     private float defaultFogDensity;
     private Material defaultSkybox;
-    private Material noSkybox;
+    private Material underwaterSkybox;
 
     // LIFECYCLE
 
@@ -24,7 +24,7 @@ public class CameraManager : MonoBehaviour
         defaultFogColor = RenderSettings.fogColor;
         defaultFogDensity = RenderSettings.fogDensity;
         defaultSkybox = RenderSettings.skybox;
-        Debug.Log(defaultSkybox);
+        underwaterSkybox = null;
     }
 
     void Start()
@@ -38,9 +38,9 @@ public class CameraManager : MonoBehaviour
         if (transform.position.y < waterManager.transform.position.y)
         {
             RenderSettings.fog = true;
-            RenderSettings.fogColor = fogColor;
-            RenderSettings.fogDensity = fogDensity;
-            RenderSettings.skybox = noSkybox;
+            RenderSettings.fogColor = underwaterFogColor;
+            RenderSettings.fogDensity = underwaterFogDensity;
+            RenderSettings.skybox = underwaterSkybox;
         }
         else
         {
