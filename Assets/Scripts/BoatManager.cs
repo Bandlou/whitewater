@@ -87,10 +87,9 @@ public class BoatManager : MonoBehaviour
         {
             // Get boat grid coordinates
             waterManager.GetGridCoordinates(transform.position, out int x, out int z);
-            Debug.Log("x=" + x + ", z=" + z);
 
             // Get local water data
-            float waterHeight = waterManager.WaterHeightGrid[x, z] + waterManager.transform.position.y;
+            float waterHeight = waterManager.WaterGrid[x, z].height + waterManager.transform.position.y;
 
             // If near the water surface
             if (Mathf.Abs(transform.position.y - waterHeight) < waterSurfaceDistToPaddle)
@@ -129,14 +128,14 @@ public class BoatManager : MonoBehaviour
                 waterManager.GetGridCoordinates(faceWorldPosition, out int faceX, out int faceZ);
 
                 // Get local water height
-                float waterHeight = waterManager.WaterHeightGrid[faceX, faceZ] + waterManager.transform.position.y;
+                float waterHeight = waterManager.WaterGrid[faceX, faceZ].height + waterManager.transform.position.y;
 
                 // If under water
                 if (faceWorldFloatingHeight < waterHeight)
                 {
                     // Get local water data
-                    Vector3 waterNormal = waterManager.WaterNormalGrid[faceX, faceZ];
-                    Vector2 waterVelocity = waterManager.WaterVelocityGrid[faceX, faceZ];
+                    Vector3 waterNormal = waterManager.WaterGrid[faceX, faceZ].normal;
+                    Vector2 waterVelocity = waterManager.WaterGrid[faceX, faceZ].velocity;
                     Vector3 waterForce = Vector3.ProjectOnPlane(new Vector3(waterVelocity.x, 0, waterVelocity.y), waterNormal);
 
                     // Push upward

@@ -24,9 +24,9 @@ public class Floater : MonoBehaviour
         waterManager.GetGridCoordinates(transform.position, out int x, out int z);
 
         // Get local water data
-        float waterHeight = waterManager.WaterHeightGrid[x, z] + waterManager.transform.position.y;
-        Vector3 waterNormal = waterManager.WaterNormalGrid[x, z];
-        Vector2 waterVelocity = waterManager.WaterVelocityGrid[x, z];
+        float waterHeight = waterManager.WaterGrid[x, z].height + waterManager.transform.position.y;
+        Vector3 waterNormal = waterManager.WaterGrid[x, z].normal;
+        Vector2 waterVelocity = waterManager.WaterGrid[x, z].velocity;
 
         // If under water
         if (transform.position.y < waterHeight)

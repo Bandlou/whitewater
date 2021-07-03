@@ -6,6 +6,14 @@ using UnityEngine;
 [ExecuteAlways]
 public class WaterManager : MonoBehaviour
 {
+    // STRUCT
+    public struct WaterData
+    {
+        public float height;
+        public Vector3 normal;
+        public Vector2 velocity;
+    }
+
     // PUBLIC FIELDS
     public Vector2Int tilesInGrid = new Vector2Int(1, 1);
     public Vector2Int cellsInTile = new Vector2Int(200, 200);
@@ -15,14 +23,10 @@ public class WaterManager : MonoBehaviour
 
     // PROPERTIES
     public Vector2Int GridSize { get => tilesInGrid * cellsInTile; }
-    public float[,] WaterHeightGrid { get => waterHeightGrid; }
-    public Vector3[,] WaterNormalGrid { get => waterNormalGrid; }
-    public Vector2[,] WaterVelocityGrid { get => waterVelocityGrid; }
+    public WaterData[,] WaterGrid { get => waterGrid; }
 
     // PRIVATE FIELDS
-    private float[,] waterHeightGrid;
-    private Vector3[,] waterNormalGrid;
-    private Vector2[,] waterVelocityGrid;
+    private WaterData[,] waterGrid;
 
     // LIFECYCLE
 
@@ -30,16 +34,14 @@ public class WaterManager : MonoBehaviour
     {
         if (buildMode)
         {
-            // Initialize water height & velocity grids
-            waterHeightGrid = new float[GridSize[0], GridSize[1]];
-            waterVelocityGrid = new Vector2[GridSize[0], GridSize[1]];
+            waterGrid = new WaterData[GridSize[0], GridSize[1]];
 
             for (int x = 0; x < GridSize[0]; ++x)
             {
                 for (int z = 0; z < GridSize[1]; ++z)
                 {
-                    waterHeightGrid[x, z] = 0;// (x + z) * 0.1f; // Mathf.Pow(x - gridSize[0] * .5f, 2) * .001f;
-                    waterVelocityGrid[x, z] = Vector2.right * 0;
+                    waterGrid[x, z].height = 0;// (x + z) * 0.1f; // Mathf.Pow(x - gridSize[0] * .5f, 2) * .001f;
+                    waterGrid[x, z].velocity = Vector2.right * 0;
                 }
             }
         }
@@ -58,7 +60,7 @@ public class WaterManager : MonoBehaviour
             {
                 for (int z = 0; z < GridSize[1]; ++z)
                 {
-                    verticeList.Add(new Vector3(x * cellSize, waterHeightGrid[x, z], z * cellSize));
+                    verticeList.Add(new Vector3(x * cellSize, waterGrid[x, z].height, z * cellSize));
                     uvList.Add(Vector2.up);
                     if (x < GridSize[0] - 1 && z < GridSize[1] - 1)
                     {
@@ -96,22 +98,18 @@ public class WaterManager : MonoBehaviour
             mesh.RecalculateNormals();
             var vertices = mesh.vertices;
             var normals = mesh.normals;
-            waterNormalGrid = new Vector3[GridSize[0], GridSize[1]];
             for (int i = 0; i < vertices.Length; ++i)
             {
                 int x = Mathf.RoundToInt(vertices[i].x * (1f / cellSize));
                 int z = Mathf.RoundToInt(vertices[i].z * (1f / cellSize));
-                waterNormalGrid[x, z] = new Vector3(normals[i].x, normals[i].y, normals[i].z);
+                waterGrid[x, z].normal = new Vector3(normals[i].x, normals[i].y, normals[i].z);
             }
         }
         else
         {
             // Initialize water data grids
             var meshFilters = GetComponentsInChildren<MeshFilter>();
-
-            waterHeightGrid = new float[GridSize[0], GridSize[1]];
-            waterNormalGrid = new Vector3[GridSize[0], GridSize[1]];
-            waterVelocityGrid = new Vector2[GridSize[0], GridSize[1]];
+            waterGrid = new WaterData[GridSize[0], GridSize[1]];
 
             // Loop through all tiles
             foreach (var meshFilter in meshFilters)
@@ -136,9 +134,9 @@ public class WaterManager : MonoBehaviour
 
                     if (x < GridSize[0] && z < GridSize[1])
                     {
-                        waterHeightGrid[x, z] = vertices[i].y;
-                        waterNormalGrid[x, z] = new Vector3(normals[i].x, normals[i].y, normals[i].z);
-                        waterVelocityGrid[x, z] = Vector2.right * 0;
+                        waterGrid[x, z].height = vertices[i].y;
+                        waterGrid[x, z].normal = new Vector3(normals[i].x, normals[i].y, normals[i].z);
+                        waterGrid[x, z].velocity = Vector2.right * 0;
                     }
                 }
             }
@@ -151,13 +149,16 @@ public class WaterManager : MonoBehaviour
     {
         x = Mathf.RoundToInt((position.x - transform.position.x) * (1f / cellSize));
         z = Mathf.RoundToInt((position.z - transform.position.z) * (1f / cellSize));
+
+        if (x < 0 || x >= GridSize[0] || z < 0 || z >= GridSize[1])
+            Debug.Log("ERROR");
     }
 
     // PRIVATE METHODS
 
     private void OnDrawGizmos()
     {
-        if (debugMode && waterVelocityGrid != null)
+        if (debugMode && waterGrid != null)
         {
             for (int x = 0; x < GridSize[0]; x += 5)
             {
@@ -166,12 +167,12 @@ public class WaterManager : MonoBehaviour
                     var position = transform.position + new Vector3(x, 0, z) * cellSize;
 
                     // Velocity
-                    var velocity = waterVelocityGrid[x, z];
+                    var velocity = waterGrid[x, z].velocity;
                     var velocity3 = new Vector3(velocity.x, 0, velocity.y);
                     Debug.DrawLine(position, position + velocity3 * cellSize, Color.red);
 
                     // Normal
-                    var normal = waterNormalGrid[x, z];
+                    var normal = waterGrid[x, z].normal;
                     Debug.DrawLine(position, position + normal * cellSize, Color.green);
                 }
             }
