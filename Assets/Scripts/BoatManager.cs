@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -44,6 +45,7 @@ public class BoatManager : MonoBehaviour
 
     // PRIVATE FIELDS
     private new Rigidbody rigidbody;
+    private bool canPaddle = false;
     private FaceData[] facesData;
     private float totalSurface;
 
@@ -88,11 +90,20 @@ public class BoatManager : MonoBehaviour
             // Get boat grid coordinates
             waterManager.GetGridCoordinates(transform.position, out int x, out int z);
 
-            // Get local water data
-            float waterHeight = waterManager.WaterGrid[x, z].height + waterManager.transform.position.y;
+            // Check if can paddle
+            canPaddle = false;
+            if (waterManager.AreCoordinatesValid(x, z))
+            {
+                // Get local water data
+                float waterHeight = waterManager.WaterGrid[x, z].height + waterManager.transform.position.y;
 
-            // If near the water surface
-            if (Mathf.Abs(transform.position.y - waterHeight) < waterSurfaceDistToPaddle)
+                // If near the water surface
+                if (Mathf.Abs(transform.position.y - waterHeight) < waterSurfaceDistToPaddle)
+                    canPaddle = true;
+            }
+
+            // Apply inputs if authorized
+            if (canPaddle)
             {
                 // Paddle (forward direction)
                 float forwardMovement = -Input.GetAxis("Vertical");
@@ -127,33 +138,37 @@ public class BoatManager : MonoBehaviour
                 // Get local grid coordinates
                 waterManager.GetGridCoordinates(faceWorldPosition, out int faceX, out int faceZ);
 
-                // Get local water height
-                float waterHeight = waterManager.WaterGrid[faceX, faceZ].height + waterManager.transform.position.y;
-
-                // If under water
-                if (faceWorldFloatingHeight < waterHeight)
+                // Check if not out of grid
+                if (waterManager.AreCoordinatesValid(faceX, faceZ))
                 {
-                    // Get local water data
-                    Vector3 waterNormal = waterManager.WaterGrid[faceX, faceZ].normal;
-                    Vector2 waterVelocity = waterManager.WaterGrid[faceX, faceZ].velocity;
-                    Vector3 waterForce = Vector3.ProjectOnPlane(new Vector3(waterVelocity.x, 0, waterVelocity.y), waterNormal);
+                    // Get local water height
+                    float waterHeight = waterManager.WaterGrid[faceX, faceZ].height + waterManager.transform.position.y;
 
-                    // Push upward
-                    float displacementMultiplier = Mathf.Clamp01((waterHeight - faceWorldFloatingHeight) / depthBeforeSubmerged) * displacementAmount;
-                    rigidbody.AddForceAtPosition(waterNormal * Physics.gravity.magnitude * faceSurfaceRatio * displacementMultiplier,
-                                                 faceWorldPosition,
-                                                 ForceMode.Acceleration);
-                    rigidbody.AddForce(faceSurfaceRatio * displacementMultiplier * -rigidbody.velocity * waterDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
-                    rigidbody.AddTorque(faceSurfaceRatio * displacementMultiplier * -rigidbody.angularVelocity * angularDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
-
-                    // Push according to water velocity
-                    var faceWorldNormal = transform.rotation * facesData[i].Normal;
-                    var dot = Vector3.Dot(faceWorldNormal, waterForce);
-                    if (dot < 0)
+                    // If under water
+                    if (faceWorldFloatingHeight < waterHeight)
                     {
-                        var sqrDot = Mathf.Pow(dot, 2);
-                        var resultingForce = faceWorldNormal * -sqrDot;
-                        rigidbody.AddForceAtPosition(resultingForce * faceSurface * waterForce.magnitude, faceWorldPosition, ForceMode.Force);
+                        // Get local water data
+                        Vector3 waterNormal = waterManager.WaterGrid[faceX, faceZ].normal;
+                        Vector2 waterVelocity = waterManager.WaterGrid[faceX, faceZ].velocity;
+                        Vector3 waterForce = Vector3.ProjectOnPlane(new Vector3(waterVelocity.x, 0, waterVelocity.y), waterNormal);
+
+                        // Push upward
+                        float displacementMultiplier = Mathf.Clamp01((waterHeight - faceWorldFloatingHeight) / depthBeforeSubmerged) * displacementAmount;
+                        rigidbody.AddForceAtPosition(waterNormal * Physics.gravity.magnitude * faceSurfaceRatio * displacementMultiplier,
+                                                     faceWorldPosition,
+                                                     ForceMode.Acceleration);
+                        rigidbody.AddForce(faceSurfaceRatio * displacementMultiplier * -rigidbody.velocity * waterDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
+                        rigidbody.AddTorque(faceSurfaceRatio * displacementMultiplier * -rigidbody.angularVelocity * angularDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
+
+                        // Push according to water velocity
+                        var faceWorldNormal = transform.rotation * facesData[i].Normal;
+                        var dot = Vector3.Dot(faceWorldNormal, waterForce);
+                        if (dot < 0)
+                        {
+                            var sqrDot = Mathf.Pow(dot, 2);
+                            var resultingForce = faceWorldNormal * -sqrDot;
+                            rigidbody.AddForceAtPosition(resultingForce * faceSurface * waterForce.magnitude, faceWorldPosition, ForceMode.Force);
+                        }
                     }
                 }
             }

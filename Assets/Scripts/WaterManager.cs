@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -149,9 +150,11 @@ public class WaterManager : MonoBehaviour
     {
         x = Mathf.RoundToInt((position.x - transform.position.x) * (1f / cellSize));
         z = Mathf.RoundToInt((position.z - transform.position.z) * (1f / cellSize));
+    }
 
-        if (x < 0 || x >= GridSize[0] || z < 0 || z >= GridSize[1])
-            Debug.Log("ERROR");
+    public bool AreCoordinatesValid(int x, int z)
+    {
+        return x >= 0 && x <= GridSize[0] && z >= 0 && z < GridSize[1];
     }
 
     // PRIVATE METHODS

@@ -34,8 +34,19 @@ public class CameraManager : MonoBehaviour
 
     void Update()
     {
+        // Get local grid coordinates
+        waterManager.GetGridCoordinates(transform.position, out int x, out int z);
+
+        // Check underwater status
+        bool underwater = false;
+        if (waterManager.AreCoordinatesValid(x, z))
+        {
+            float waterHeight = waterManager.WaterGrid[x, z].height + waterManager.transform.position.y;
+            underwater = transform.position.y < waterHeight;
+        }
+
         // Underwater effect
-        if (transform.position.y < waterManager.transform.position.y)
+        if (underwater)
         {
             RenderSettings.fog = true;
             RenderSettings.fogColor = underwaterFogColor;
