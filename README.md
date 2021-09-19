@@ -11,6 +11,7 @@ A whitewater boat simulation game prototype focused primarily on slalom and free
   - Inv. proportional to streamlining (shape of the boat)
 - Water forces:
   - Buoyancy force: B = pVg = 1000 * volume displaced body * g (direction = upward)
+  - https://www.gamasutra.com/view/news/237528/Water_interaction_model_for_boats_in_video_games.php
   - Viscosity force: Fgamma = 6 * Pi * 1.002 * radius displaced body * velocity (direction = against velocity)
   - Drag force: Fdrag = 0.5 * dragCoef * p * Ac * v^2 = 0.5 * DragCoeff * 1000 * CrossSectionalArea * velocity^2
 
