@@ -1,6 +1,13 @@
 # Whitewater
 A whitewater boat simulation game prototype focused primarily on slalom and freestyle
 
+## Screenshots (WIP)
+![In action](readme_res/wave.png)
+
+![The boat](readme_res/boat.png)
+
+![Boat physic](readme_res/physic.png)
+
 ## Dictionary
 - https://www.ville-huningue.fr/fr/dictionnaire-multilingue/
 
