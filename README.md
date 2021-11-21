@@ -1,6 +1,6 @@
 # Whitewater
-- Game engine: __Unity Engine v2020.3.2__
-- Contributor: __Louis Bandelier__
+- Game engine: __Unity (v2020.3.2)__
+- Contribution: __Louis BANDELIER__
 
 A whitewater boat simulation game prototype focused primarily on slalom and freestyle
 
